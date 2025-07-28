@@ -20,5 +20,5 @@ streamlit_folium
 pydrive2
 docxtpl
 docx
-python-docx 
-pdfkit
+python-docx
+streamlit_gsheets
