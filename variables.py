@@ -1,0 +1,8 @@
+sheetId="13ZLkgo6a8NfhRtBZekDd9Lh6I_zLACt7ufop8hrnOp0"
+tabHotelSede="hotel-sede"
+tabBeneficios="Beneficios"
+connectionName="gsheets"
+connectionHotel="hotelSede"
+connectionOnboarding="onboarding"
+driveFolderId="1kmJnV6Xvjg6dR7vTdQHUV5VDH6sWHuYj"
+estados=["Iniciado","Carta Enviada", "Falta Info/Doc", "Firmado", "Cancelado"]
