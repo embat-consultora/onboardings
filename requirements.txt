@@ -1,6 +1,6 @@
 streamlit
 gspread==5.12.0
- dgoogle-auth==2.22.0
+dgoogle-auth==2.22.0
 google-auth-oauthlib==1.0.0
 oauth2client==4.1.3
 pandas==2.2.2
