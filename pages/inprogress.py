@@ -295,7 +295,7 @@ if st.button("Guardar", disabled=not campos_obligatorios_completos):
             st.warning(f"No se pudieron subir los archivos a Drive: {e}")
         
         try:
-            save_to_google_sheet(data)
+            save_to_google_sheet(data, variables.connectionOnboarding)
             st.success("✅ Onboarding guardado correctamente.")
         except Exception as e:
             st.error(f"❌ Error al guardar los datos: {e}")

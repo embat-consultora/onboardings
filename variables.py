@@ -4,5 +4,6 @@ tabBeneficios="Beneficios"
 connectionName="gsheets"
 connectionHotel="hotelSede"
 connectionOnboarding="onboarding"
+connectionformBuddy="formBuddy"
 driveFolderId="1kmJnV6Xvjg6dR7vTdQHUV5VDH6sWHuYj"
 estados=["Iniciado","Carta Enviada", "Falta Info/Doc", "Firmado", "Cancelado"]

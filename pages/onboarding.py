@@ -156,16 +156,22 @@ if st.button("Guardar", disabled=not campos_obligatorios_completos):
         "Seguridad Social": ss,
         "Cuenta Bancaria": cuenta
     }
+
+    archivos_a_subir = {k: v for k, v in files_dict.items() if v is not None}
+
     with st.spinner("Guardando datos y generando carta... puede tardar unos segundos"):
-        try:
-            links = upload_documents_to_drive(email_ingreso, files_dict)
-            for k, v in links.items():
-                data[f"Link {k}"] = v
-        except Exception as e:
-            st.warning(f"No se pudieron subir los archivos a Drive: {e}")
+        if archivos_a_subir:
+            try:
+                links = upload_documents_to_drive(email_ingreso, archivos_a_subir)
+                for k, v in links.items():
+                    data[f"Link {k}"] = v
+            except Exception as e:
+                st.warning(f"No se pudieron subir los archivos a Drive: {e}")
+        else:
+            st.info("Ningun archivo para subir.")
 
         try:
-            save_to_google_sheet(data)
+            save_to_google_sheet(data, variables.connectionOnboarding)
             file_utils.generarCarta(data)
             st.success("✅ Onboarding guardado correctamente.")
             st.switch_page("pages/inprogress.py")
