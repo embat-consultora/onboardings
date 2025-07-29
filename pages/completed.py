@@ -4,6 +4,7 @@ from page_utils import apply_page_config
 import json
 import variables
 import pandas as pd
+from datetime import date
 from sheet_connection import getOnboardings,get_worksheet
 from modulos.secciones import (
     seccion_informacion_personal,
@@ -35,8 +36,12 @@ if df.empty or "Estado" not in df.columns:
 df_in_progress = df[df["Estado"].isin([variables.estados[3],variables.estados[4]])]
 
 if df_in_progress.empty:
-    st.info("No hay onboardings en finalizados.")
+    st.info("No hay onboardings en progreso.")
+    if st.button("Traer últimos onboardings 🔄"):
+        getOnboardings.clear()
+        df = getOnboardings()
     st.stop()
+
 
 # Mostrar selectbox con emails
 emails_disponibles = df_in_progress["Email"].dropna().unique().tolist()
@@ -52,19 +57,44 @@ with colSpace:
     if st.button("🔄"):
         getOnboardings.clear()
         df = getOnboardings()
+if "last_email_selected" not in st.session_state:
+    st.session_state.last_email_selected = None
 
-colTitle, colEstado = st.columns(2)
+if st.session_state.last_email_selected is None:
+    st.session_state.last_email_selected = email_seleccionado
+
+colTitle, colFecha, colEstado,  = st.columns(3)
 with colTitle:
     st.subheader("📋 Detalles del onboarding")
 with colEstado:
-    valor_actual = data_inicial.get("Estado", "Iniciado")  # valor por defecto
+    st.text_input("Fecha Inicio Onboarding",value=data_inicial.get("Fecha creación"), disabled=True)
+
+estadoContainer = st.expander("Estado")
+with estadoContainer:
+    col1, col2 = st.columns(2)
+    valor_actual = data_inicial.get("Estado", "Iniciado")
     try:
         index_estado = variables.estados.index(valor_actual)
     except ValueError:
-        index_estado = 0  # fallback si el valor no está en la lista
+        index_estado = 0
 
-    estado = st.selectbox("Estado", variables.estados, index=index_estado)
+    with col1:
+        estado = st.selectbox("", variables.estados, index=index_estado)
 
+    with col2:
+        if estado in [variables.estados[1], variables.estados[3]]:
+            ofertaDate = data_inicial.get("Oferta Enviada")
+            contratoDate = data_inicial.get("Contrato Firmado")
+
+            # Obtener fecha actual como string
+            hoy = date.today().strftime("%d/%m/%Y")
+
+            if estado == variables.estados[1]:
+                fecha_valor = hoy if pd.isna(ofertaDate) or not ofertaDate else ofertaDate
+            else:
+                fecha_valor = hoy if pd.isna(contratoDate) or not contratoDate else contratoDate
+
+            st.text_input("Fecha", value=fecha_valor, disabled=True)
 infoPersonal = st.expander("🦸‍♂️ Información Personal")
 with infoPersonal:
   datos_personales = seccion_informacion_personal(data_inicial,disabled=True)
@@ -91,18 +121,21 @@ with subirDocs:
 
 
 st.subheader("Beneficios")
-# Guardar el último email seleccionado
+# Inicializar si aún no existe
 if "last_email_selected" not in st.session_state:
     st.session_state.last_email_selected = None
 
-# Actualizar checkboxes si cambia el email seleccionado
-if st.session_state.last_email_selected != email_seleccionado:
-    # Borrar todos los checkboxes anteriores
+# Inicializar beneficios si nunca se cargaron o si cambió el email
+email_cambio = st.session_state.last_email_selected != email_seleccionado
+beneficios_inicializados = any(k.startswith("checkbox_") for k in st.session_state)
+
+if email_cambio or not beneficios_inicializados:
+    # Limpiar anteriores
     for key in list(st.session_state.keys()):
         if key.startswith("checkbox_"):
             del st.session_state[key]
 
-    # Cargar beneficios guardados del onboarding actual
+    # Obtener beneficios guardados (si los hay)
     beneficios_guardados = {}
     if isinstance(data_inicial.get("Beneficios"), str):
         try:
@@ -110,20 +143,19 @@ if st.session_state.last_email_selected != email_seleccionado:
         except Exception:
             beneficios_guardados = {}
 
-    # Setear nuevos valores de los checkboxes
+    # Guardar en session_state
     for beneficio in beneficiosLista["Nombre"].dropna().unique().tolist():
         key = f"checkbox_{beneficio}"
         st.session_state[key] = beneficios_guardados.get(beneficio, False)
 
+    # Actualizar email actual
     st.session_state.last_email_selected = email_seleccionado
-
-
 beneficiosContainer = st.container(height=400)
 with beneficiosContainer:
     opciones_beneficios = beneficiosLista["Nombre"].dropna().unique().tolist()
     for beneficio in opciones_beneficios:
         key = f"checkbox_{beneficio}"
-        st.checkbox(beneficio, key=key)
+        st.checkbox(beneficio, key=key, disabled=True)
 
     seleccionados = [
         beneficio for beneficio in opciones_beneficios

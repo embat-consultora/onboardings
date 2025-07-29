@@ -7,6 +7,7 @@ from sheet_connection import getOnboardings,save_to_google_sheet, get_worksheet,
 import data_utils
 import json
 import file_utils
+from datetime import date
 from modulos.secciones import (
     seccion_informacion_personal,
     seccion_informacion_laboral,
@@ -43,6 +44,9 @@ df_in_progress = df[df["Estado"].isin([variables.estados[0], variables.estados[1
 
 if df_in_progress.empty:
     st.info("No hay onboardings en progreso.")
+    if st.button("Traer últimos onboardings 🔄"):
+        getOnboardings.clear()
+        df = getOnboardings()
     st.stop()
 
 # Mostrar selectbox con emails
@@ -62,25 +66,48 @@ with colSpace:
         getOnboardings.clear()
         df = getOnboardings()
 
+if "last_email_selected" not in st.session_state:
+    st.session_state.last_email_selected = None
+
+if st.session_state.last_email_selected is None:
+    st.session_state.last_email_selected = email_seleccionado
 colTitle, colFecha, colEstado,  = st.columns(3)
 with colTitle:
     st.subheader("📋 Detalles del onboarding")
-with colFecha:
-    st.text_input("Fecha Onboarding",value=data_inicial.get("Fecha creación"), disabled=True)
 with colEstado:
-    valor_actual = data_inicial.get("Estado", "Iniciado")  # valor por defecto
-    try:
-        index_estado = variables.estados.index(valor_actual)
-    except ValueError:
-        index_estado = 0  # fallback si el valor no está en la lista
-    estado = st.selectbox("Estado", variables.estados, index=index_estado)
+    st.text_input("Fecha Inicio Onboarding",value=data_inicial.get("Fecha creación"), disabled=True)
 
 
 hotelSede = get_worksheet(variables.sheetId,variables.tabHotelSede)
 hotelPais = hotelSede[["Nombre", "Pais"]].dropna()
 
 beneficiosLista = get_worksheet(variables.sheetId,variables.tabBeneficios)
+estadoContainer = st.expander("Estado")
+with estadoContainer:
+    col1, col2 = st.columns(2)
+    valor_actual = data_inicial.get("Estado", "Iniciado")
+    try:
+        index_estado = variables.estados.index(valor_actual)
+    except ValueError:
+        index_estado = 0
 
+    with col1:
+        estado = st.selectbox("", variables.estados, index=index_estado)
+
+    with col2:
+        if estado in [variables.estados[1], variables.estados[3]]:
+            ofertaDate = data_inicial.get("Oferta Enviada")
+            contratoDate = data_inicial.get("Contrato Firmado")
+
+            # Obtener fecha actual como string
+            hoy = date.today().strftime("%d/%m/%Y")
+
+            if estado == variables.estados[1]:
+                fecha_valor = hoy if pd.isna(ofertaDate) or not ofertaDate else ofertaDate
+            else:
+                fecha_valor = hoy if pd.isna(contratoDate) or not contratoDate else contratoDate
+
+            st.text_input("Fecha", value=fecha_valor, disabled=True)
 
 infoPersonal = st.expander("🦸‍♂️ Información Personal", expanded=True)
 with infoPersonal:
@@ -102,7 +129,6 @@ with infoGeneral:
 subirDocs = st.expander("⏫️ Subir Documentos")
 with subirDocs:
     st.write("Documentos Subidos:")
-
     for key, url in data_inicial.items():
         if key.startswith("Link ") and pd.notna(url) and str(url).strip():
             nombre = key.replace("Link ", "")
@@ -112,22 +138,25 @@ with subirDocs:
     dni_doc = st.file_uploader("Subir DNI")
     ss = st.file_uploader("Seguridad Social")
     cuenta = st.file_uploader("Detalles de cuenta bancaria")
-
+    contrato = st.file_uploader("Contrato Firmado")
 
 st.subheader("Beneficios")
 
-# Guardar el último email seleccionado
+# Inicializar si aún no existe
 if "last_email_selected" not in st.session_state:
     st.session_state.last_email_selected = None
 
-# Actualizar checkboxes si cambia el email seleccionado
-if st.session_state.last_email_selected != email_seleccionado:
-    # Borrar todos los checkboxes anteriores
+# Inicializar beneficios si nunca se cargaron o si cambió el email
+email_cambio = st.session_state.last_email_selected != email_seleccionado
+beneficios_inicializados = any(k.startswith("checkbox_") for k in st.session_state)
+
+if email_cambio or not beneficios_inicializados:
+    # Limpiar anteriores
     for key in list(st.session_state.keys()):
         if key.startswith("checkbox_"):
             del st.session_state[key]
 
-    # Cargar beneficios guardados del onboarding actual
+    # Obtener beneficios guardados (si los hay)
     beneficios_guardados = {}
     if isinstance(data_inicial.get("Beneficios"), str):
         try:
@@ -135,13 +164,13 @@ if st.session_state.last_email_selected != email_seleccionado:
         except Exception:
             beneficios_guardados = {}
 
-    # Setear nuevos valores de los checkboxes
+    # Guardar en session_state
     for beneficio in beneficiosLista["Nombre"].dropna().unique().tolist():
         key = f"checkbox_{beneficio}"
         st.session_state[key] = beneficios_guardados.get(beneficio, False)
 
+    # Actualizar email actual
     st.session_state.last_email_selected = email_seleccionado
-
 
 beneficiosContainer = st.container(height=400)
 with beneficiosContainer:
@@ -175,6 +204,7 @@ nombre_superior= datos_laborales["Superior"]
 mail_superior= datos_laborales["Mail Superior"]
 nombre_secretaria= datos_laborales["Secretaría Dirección"]
 mail_secretaria= datos_laborales["Mail Secretaría"]
+pais=datos_laborales["Pais"]
 
 fecha_incorporacion= datos_remuneracion["Fecha incorporación"] 
 retribucion_fija= datos_remuneracion["Retribución fija"] 
@@ -196,6 +226,8 @@ campos_obligatorios_completos = (
 )
 # ---------------------- GUARDAR DATOS ----------------------
 fecha_creacion = data_inicial["Fecha creación"]
+oferta_enviada = date.today().strftime("%d/%m/%Y") if estado == variables.estados[1] else ""
+contrato_firmado = date.today().strftime("%d/%m/%Y") if estado == variables.estados[3] else ""
 if st.button("Guardar", disabled=not campos_obligatorios_completos):
     beneficios_json = {
         beneficio: st.session_state.get(f"checkbox_{beneficio}", False)
@@ -212,6 +244,7 @@ if st.button("Guardar", disabled=not campos_obligatorios_completos):
         "Departamento": departamento,
         "Puesto reporte": puesto_reporte,
         "Ubicación": ubicacion,
+        "Pais": pais,
         "Fecha incorporación": fecha_incorporacion.strftime("%d/%m/%Y"),
         "Tipo contrato": tipo_contrato,
         "Condiciones": condiciones,
@@ -230,18 +263,20 @@ if st.button("Guardar", disabled=not campos_obligatorios_completos):
         "Mail Secretaría": mail_secretaria if 'mail_secretaria' in locals() else "",
         "Recruiter": nombre_recruiter,
         "Beneficios": json.dumps(beneficios_json, ensure_ascii=False),
-        "Estado": estado
+        "Estado": estado,
+        "Oferta Enviada": oferta_enviada,
+        "Contrato Firmado": contrato_firmado  
     }
     files_dict = {
         "CV": cv,
         "DNI": dni_doc,
         "Seguridad Social": ss,
-        "Cuenta Bancaria": cuenta
+        "Cuenta Bancaria": cuenta,
+        "Contrato Firmado":contrato
     }
     with st.spinner("Guardando datos y archivos."):
         try:
             archivos_a_subir = {k: v for k, v in files_dict.items() if v is not None}
-
             # Mantener links existentes
             for key, val in data_inicial.items():
                 if key.startswith("Link ") and key not in data:

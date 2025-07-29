@@ -59,7 +59,7 @@ def getOnboardings():
 
     try:
         existing_data = conn.read(worksheet="onboarding", ttl=0)
-        if existing_data is None or existing_data.empty:
+        if existing_data is None:
             raise ValueError("❌ No se pudo leer la hoja 'onboarding'")
         else:
             return existing_data
@@ -76,7 +76,7 @@ def save_to_google_sheet(data):
 
     try:
         existing_data = conn.read(worksheet="onboarding", ttl=0)
-        if existing_data is None or existing_data.empty:
+        if existing_data is None:
             raise ValueError("❌ No se pudo leer la hoja 'onboarding'")
     except Exception as e:
         logging.error(f"Error al leer la hoja: {e}", exc_info=True)

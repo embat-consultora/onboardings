@@ -30,11 +30,12 @@ title, dateHeader = st.columns([3,1])
 with title:
     st.header("Datos del nuevo ingreso")
     st.write("Completa el siguiente formulario para registrar una nueva incorporación")
+    st.write("Una vez que guardes toda la información, redirigite a la sección 'Onboardings' del menú para descargar la carta de oferta")
 with dateHeader:
     fecha_creacion = date.today().strftime("%d/%m/%Y")
     st.text_input("Fecha Formulario", value=str(fecha_creacion), disabled=True)
 
-infoPersonal = st.expander("🦸‍♂️ Información Personal")
+infoPersonal = st.expander("🦸‍♂️ Información Personal",expanded=True)
 with infoPersonal:
   datos_personales = seccion_informacion_personal()
 
@@ -92,6 +93,7 @@ nombre_superior= datos_laborales["Superior"]
 mail_superior= datos_laborales["Mail Superior"]
 nombre_secretaria= datos_laborales["Secretaría Dirección"]
 mail_secretaria= datos_laborales["Mail Secretaría"]
+pais=datos_laborales["Pais"]
 
 fecha_incorporacion= datos_remuneracion["Fecha incorporación"]
 retribucion_fija= datos_remuneracion["Retribución fija"] 
@@ -126,6 +128,7 @@ if st.button("Guardar", disabled=not campos_obligatorios_completos):
         "Posición": posicion,
         "Departamento": departamento,
         "Puesto reporte": puesto_reporte,
+        "Pais": pais,
         "Ubicación": ubicacion,
         "Fecha incorporación": fecha_incorporacion.strftime("%d/%m/%Y"),
         "Tipo contrato": tipo_contrato,
