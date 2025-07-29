@@ -21,8 +21,7 @@ streamlit_calendar
 streamlit-cookies-manager
 streamlit_carousel
 st-files-connection
-gsheets-streamlit
-
+st-gsheets-connection
 # Visualización
 plotly
 matplotlib
