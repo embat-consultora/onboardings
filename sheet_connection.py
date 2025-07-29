@@ -9,7 +9,6 @@ from pydrive2.drive import GoogleDrive
 import tempfile
 import os
 import variables
-from tempfile import NamedTemporaryFile
 
 logging.basicConfig(level=logging.DEBUG)
 @st.cache_resource(show_spinner=True)
