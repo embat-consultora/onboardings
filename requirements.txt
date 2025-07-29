@@ -1,24 +1,42 @@
-streamlit
+# Core
+streamlit>=1.42.0
+pandas==2.2.2
+numpy==1.26.2
+
+# Google Sheets & Drive
 gspread==5.12.0
 google-auth==2.22.0
 google-auth-oauthlib==1.0.0
+google-auth-httplib2
+google-api-python-client
 oauth2client==4.1.3
-pandas==2.2.2
-matplotlib
-plotly
-numpy==1.26.2
-streamlit_extras
-streamlit-calendar
-streamlit_javascript
-pandasql
-streamlit_carousel
-kaleido
-streamlit-aggrid==1.0.5
-st-gsheets-connection
-folium
-streamlit_folium
-pydrive2
-docxtpl
-docx
-python-docx
 streamlit_gsheets
+pydrive2
+gcsfs  # si estás leyendo archivos de Google Cloud Storage
+
+# Streamlit Extras & Plugins
+streamlit_extras
+streamlit-aggrid==1.0.5
+streamlit_javascript
+streamlit_calendar
+streamlit-cookies-manager
+streamlit_carousel
+st-files-connection
+
+# Visualización
+plotly
+matplotlib
+kaleido<=0.2.1
+chart_studio
+
+# Utilidades
+pandasql
+python-dotenv
+Authlib>=1.3.2
+streamlit-oauth
+openai
+
+# Documentos
+docxtpl
+python-docx
+pdfkit
