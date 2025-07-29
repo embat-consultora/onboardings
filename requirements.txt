@@ -1,5 +1,5 @@
 # Core
-streamlit>=1.42.0
+streamlit
 pandas==2.2.2
 numpy==1.26.2
 
@@ -10,7 +10,6 @@ google-auth-oauthlib==1.0.0
 google-auth-httplib2
 google-api-python-client
 oauth2client==4.1.3
-streamlit_gsheets
 pydrive2
 gcsfs  # si estás leyendo archivos de Google Cloud Storage
 
@@ -22,6 +21,7 @@ streamlit_calendar
 streamlit-cookies-manager
 streamlit_carousel
 st-files-connection
+gsheets-streamlit
 
 # Visualización
 plotly
