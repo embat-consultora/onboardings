@@ -12,3 +12,4 @@ st-gsheets-connection
 oauth2client
 # Documentos
 docxtpl
+pydrive2
