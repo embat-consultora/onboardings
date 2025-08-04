@@ -11,13 +11,13 @@ Onboarding process for TA - iberostar
    ```
 3. **Activar el entorno virtual:**
    ```bash
-   venv\Scripts\activate
+   source venv/bin/activate
    ```
 4. **Instalar las dependencias:**
    ```bash
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
 5. **Ejecutar la aplicación:**
    ```bash
-   streamlit run streamlist_app.py
+   streamlit run streamlit_app.py
    ```

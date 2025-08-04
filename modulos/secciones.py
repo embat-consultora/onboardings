@@ -58,14 +58,24 @@ def seccion_informacion_laboral(data_inicial=None, hotel_sede_df=None, disabled=
         
         valor_tipo = safe_get(data_inicial, "Tipo", "Corporativo")
         tipo = st.selectbox("Tipo", tipoOptions, index=tipoOptions.index(valor_tipo) if valor_tipo in tipoOptions else 0,disabled=disabled)
-        
+
         departamento = st.text_input("Departamento", value=safe_get(data_inicial, "Departamento"),disabled=disabled)
-        nombre_manager = st.text_input("Nombre Manager", value=safe_get(data_inicial, "Manager"),disabled=disabled)
+        puesto_reporte = st.text_input("Puesto del reporte directo", value=safe_get(data_inicial, "Puesto reporte"),disabled=disabled)
+        st.divider()
+
         mail_manager = st.text_input("Mail Manager", value=safe_get(data_inicial, "Mail Manager"),disabled=disabled)
+        if mail_manager == "":
+            st.warning("Este campo es obligatorio", icon="⚠️")
         if mail_manager and not data_utils.is_valid_email(mail_manager):
             st.warning("📧 El formato del email no es correcto")
-        puesto_reporte = st.text_input("Puesto del reporte directo", value=safe_get(data_inicial, "Puesto reporte"),disabled=disabled)
+        mail_hrbp = st.text_input("Mail HRBP", value=safe_get(data_inicial,"Mail HRBP"),disabled=disabled)
+        if mail_hrbp == "":
+            st.warning("Este campo es obligatorio", icon="⚠️")
+        mail_completa = st.text_input("Mail de quien completa el formulario", value=safe_get(data_inicial,"Mail TA", " "),disabled=disabled)
 
+
+
+        
     with col2:
         valor_contrato = safe_get(data_inicial, "Tipo contrato", "Fijo indefinido")
         tipo_contrato = st.selectbox("Tipo Contrato", tipoContratoOptions,
@@ -82,7 +92,6 @@ def seccion_informacion_laboral(data_inicial=None, hotel_sede_df=None, disabled=
             index=tipoPerfilLista.index(valor_perfil) if valor_perfil in tipoPerfilLista else 0,disabled=disabled)
 
         nombre_superior = mail_superior = nombre_secretaria = mail_secretaria = ""
-
         if tipoPerfil == hotel[2]:  # "Dirección"
             nombre_superior = st.text_input("Nombre Superior Directo", value=safe_get(data_inicial, "Superior"),disabled=disabled)
             mail_superior = st.text_input("Mail Superior Directo", value=safe_get(data_inicial, "Mail Superior"),disabled=disabled)
@@ -106,7 +115,11 @@ def seccion_informacion_laboral(data_inicial=None, hotel_sede_df=None, disabled=
                 index=nombres_filtrados.index(ubicacion_defecto) if ubicacion_defecto in nombres_filtrados else 0,disabled=disabled)
         else:
             ubicacion = ""
-
+        st.divider()
+        nombre_manager = st.text_input("Nombre Manager", value=safe_get(data_inicial, "Manager"),disabled=disabled)
+        nombre_hrbp = st.text_input("Nombre HRBP", value=safe_get(data_inicial,"HRBP", " "),disabled=disabled)
+        nombre_recruiter = st.text_input("Nombre Recruiter", value=safe_get(data_inicial,"Recruiter", " "),disabled=disabled)
+        nombre_completa = st.text_input("Nombre de quien completa el formulario", value=safe_get(data_inicial,"Nombre TA"),disabled=disabled)
     return {
         "Posición": posicion,
         "Tipo": tipo,
@@ -122,7 +135,12 @@ def seccion_informacion_laboral(data_inicial=None, hotel_sede_df=None, disabled=
         "Secretaría Dirección": nombre_secretaria,
         "Mail Secretaría": mail_secretaria,
         "Ubicación": ubicacion,
-        "Pais": pais_seleccionado if hotel_sede_df is not None else ""
+        "Pais": pais_seleccionado if hotel_sede_df is not None else "",
+        "HRBP": nombre_hrbp,
+        "Recruiter": nombre_recruiter,
+        "Mail TA": mail_completa,
+        "Mail HRBP": mail_hrbp,
+        "Nombre TA": nombre_completa
     }
 
 

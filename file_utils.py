@@ -3,9 +3,9 @@ import io
 import os
 from docxtpl import DocxTemplate
 import json
-def generarCarta(dataCarta):
+def generarCarta(dataCarta, tipo):
     if dataCarta:
-        buffer = generar_docx_con_datos(dataCarta)
+        buffer = generar_docx_con_datos(dataCarta, tipo)
         nombre = dataCarta.get("Nombre", "") +"_"+ dataCarta.get("Apellido", "")
         file_name = f"carta_oferta_{nombre}"
         st.download_button(
@@ -15,13 +15,17 @@ def generarCarta(dataCarta):
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-def generar_docx_con_datos(dataCarta):
+def generar_docx_con_datos(dataCarta, tipo="Corporativo"):
     base_path = os.path.dirname(os.path.abspath(__file__))
-    nombreCarta = f"carta_template.docx"
-    plantilla_path = os.path.join(base_path,"files", nombreCarta)
-    doc = DocxTemplate(plantilla_path)
-    beneficios_dict = json.loads(dataCarta.get("Beneficios", "{}"))
-    beneficios_lista = [k for k, v in beneficios_dict.items() if v]
+    beneficios_lista=''
+    if(tipo=='Hotel'):
+        nombreCarta= f"carta_template_hotel.docx"
+
+    else:
+        nombreCarta = f"carta_template.docx"
+        beneficios_dict = json.loads(dataCarta.get("Beneficios", "{}"))
+        beneficios_lista = [k for k, v in beneficios_dict.items() if v]
+    
     context = {
         "NOMBRE": dataCarta.get("Nombre", ""),
         "APELLIDO": dataCarta.get("Apellido", ""),
@@ -36,7 +40,8 @@ def generar_docx_con_datos(dataCarta):
         "PORCENTAJE": dataCarta.get("Retribución variable", ""),
         "beneficios": beneficios_lista,
     }
-   
+    plantilla_path = os.path.join(base_path,"files", nombreCarta)
+    doc = DocxTemplate(plantilla_path)
     doc.render(context)
     buffer = io.BytesIO()
     doc.save(buffer)
