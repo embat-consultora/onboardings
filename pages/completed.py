@@ -146,7 +146,7 @@ if(tipo!="Hotel"):
         opciones_beneficios = beneficiosLista["Nombre"].dropna().unique().tolist()
         for beneficio in opciones_beneficios:
             key = f"checkbox_{beneficio}"
-            st.checkbox(beneficio, key=key)
+            st.checkbox(beneficio, key=key,disabled=True)
 
         seleccionados = [
             beneficio for beneficio in opciones_beneficios
