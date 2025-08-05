@@ -195,6 +195,12 @@ campos_obligatorios_completos = (
     datos_personales["Nombre"].strip() != "" and
     apellido_ingreso.strip() != "" and
     dni.strip() != "" and
+    email_ingreso.strip() != "" 
+)
+campos_obligatorios_finalizar = (
+    datos_personales["Nombre"].strip() != "" and
+    apellido_ingreso.strip() != "" and
+    dni.strip() != "" and
     email_ingreso.strip() != "" and
     data_utils.is_valid_email(email_ingreso) and
     mail_manager.strip() != "" and
@@ -209,11 +215,11 @@ with estadoContainer:
         index_estado = variables.estados.index(valor_actual)
     except ValueError:
         index_estado = 0
-    if not campos_obligatorios_completos:
+    if not campos_obligatorios_finalizar:
             st.caption("⚠️ Completa primero todos los campos obligatorios para habilitar esta opción.")
     st.warning("Recordá que una vez que cambies el estado a Finalizado, automaticamente se enviará la información a managers y directores (según corresponda), revisar que toda la información sea correcta. Una vez que cambies el estado, no podrás volver a enviar la información")
     with col1:
-        estado = st.selectbox("", variables.estados, index=index_estado, disabled=not campos_obligatorios_completos)
+        estado = st.selectbox("", variables.estados, index=index_estado, disabled=not campos_obligatorios_finalizar)
     with col2:
         if estado in [variables.estados[1], variables.estados[3]]:
             ofertaDate = data_inicial.get("Oferta Enviada")
