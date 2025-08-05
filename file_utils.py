@@ -32,7 +32,10 @@ def generar_docx_con_datos(dataCarta, tipo="Corporativo"):
         "DEPARTAMENTO": dataCarta.get("Departamento", ""),
         "FECHA_FORM": dataCarta.get("Fecha creación", ""),
         "PUESTO_DEL_REPORTE_DIRECTO": dataCarta.get("Puesto reporte", ""),
-        "TIPO_CONTRATO": dataCarta.get("Tipo contrato", "") + " " + dataCarta.get("Tipo contrato custom", ""),
+        "TIPO_CONTRATO": " ".join(filter(None, [
+            dataCarta.get("Tipo contrato", "").strip(),
+            dataCarta.get("Tipo contrato custom", "").strip()
+        ])),
         "FECHA_ESTIMADA_INCORPORACION": str(dataCarta.get("Fecha incorporación", "")),
         "CONDICIONES": dataCarta.get("Condiciones", ""),
         "RETRIBUCION": dataCarta.get("Retribución fija", ""),
