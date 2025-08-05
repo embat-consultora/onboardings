@@ -117,6 +117,8 @@ def seccion_informacion_laboral(data_inicial=None, hotel_sede_df=None, disabled=
             ubicacion = ""
         st.divider()
         nombre_manager = st.text_input("Nombre Manager", value=safe_get(data_inicial, "Manager"),disabled=disabled)
+        if nombre_manager == "":
+            st.warning("Este campo es obligatorio", icon="⚠️")
         nombre_hrbp = st.text_input("Nombre HRBP", value=safe_get(data_inicial,"HRBP", " "),disabled=disabled)
         nombre_recruiter = st.text_input("Nombre Recruiter", value=safe_get(data_inicial,"Recruiter", " "),disabled=disabled)
         nombre_completa = st.text_input("Nombre de quien completa el formulario", value=safe_get(data_inicial,"Nombre TA"),disabled=disabled)
