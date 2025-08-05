@@ -105,6 +105,7 @@ if st.button("Generar Carta", disabled=not campos_obligatorios_completos):
         "Beneficios": json.dumps(beneficios_json, ensure_ascii=False),
         "Estado": "Iniciado",
         "Tipo": tipo,
+        "Tipo contrato custom":tipo_contrato_custom
     }
 
 

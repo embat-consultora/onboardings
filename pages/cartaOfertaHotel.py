@@ -78,7 +78,7 @@ if st.button("Generar Carta", disabled=not campos_obligatorios_completos):
         "Apellido": apellido,
         "Posición": posicion,
         "Departamento": departamento,
-
+        "Tipo contrato custom":tipo_contrato_custom,
         "Fecha incorporación": fecha_incorporacion.strftime("%d/%m/%Y"),
         "Tipo contrato": tipo_contrato,
         "Retribución fija": retribucion_fija,

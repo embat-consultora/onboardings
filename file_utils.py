@@ -25,7 +25,6 @@ def generar_docx_con_datos(dataCarta, tipo="Corporativo"):
         nombreCarta = f"carta_template.docx"
         beneficios_dict = json.loads(dataCarta.get("Beneficios", "{}"))
         beneficios_lista = [k for k, v in beneficios_dict.items() if v]
-    
     context = {
         "NOMBRE": dataCarta.get("Nombre", ""),
         "APELLIDO": dataCarta.get("Apellido", ""),
@@ -33,7 +32,7 @@ def generar_docx_con_datos(dataCarta, tipo="Corporativo"):
         "DEPARTAMENTO": dataCarta.get("Departamento", ""),
         "FECHA_FORM": dataCarta.get("Fecha creación", ""),
         "PUESTO_DEL_REPORTE_DIRECTO": dataCarta.get("Puesto reporte", ""),
-        "TIPO_CONTRATO": dataCarta.get("Tipo contrato", ""),
+        "TIPO_CONTRATO": dataCarta.get("Tipo contrato", "") + " " + dataCarta.get("Tipo contrato custom", ""),
         "FECHA_ESTIMADA_INCORPORACION": str(dataCarta.get("Fecha incorporación", "")),
         "CONDICIONES": dataCarta.get("Condiciones", ""),
         "RETRIBUCION": dataCarta.get("Retribución fija", ""),
