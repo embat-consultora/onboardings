@@ -44,11 +44,11 @@ with col2:
     valor_contrato = variables.tipoContrato
     tipo_contrato = st.selectbox("Tipo Contrato", valor_contrato,
         index=valor_contrato.index(valor_contrato) if valor_contrato in valor_contrato else 0)
-
+    
     tipo_contrato_custom = ""
     if tipo_contrato == "Otro":
         tipo_contrato_custom = st.text_input("Especifique tipo de contrato")
-
+    puestoDirecto = st.text_input("Puesto Reporte Directo")
 col1, col2 = st.columns(2)
 
 fecha_valida = date.today()
@@ -58,6 +58,14 @@ with col1:
         value=fecha_valida
     )
     retribucion_fija = st.text_input("Retribución fija" )
+    relocation = st.radio("Recolocación", ["No", "Sí"], index=0)
+
+    # Campos condicionales solo si relocation = Sí
+    vuelo = ""
+    semanas = ""
+    if relocation == "Sí":
+        vuelo = st.text_input("Datos Vuelo")
+        semanas = st.text_input("Semanas")
 with col2:
     retribucion_variable = st.text_input("Retribución variable (si aplica)")
     condiciones = st.text_input("Condiciones horarias y teletrabajo")
@@ -105,7 +113,11 @@ if st.button("Generar Carta", disabled=not campos_obligatorios_completos):
         "Beneficios": json.dumps(beneficios_json, ensure_ascii=False),
         "Estado": "Iniciado",
         "Tipo": tipo,
-        "Tipo contrato custom":tipo_contrato_custom
+        "Tipo contrato custom":tipo_contrato_custom,
+        "Relocation":relocation,
+        "Vuelo":vuelo,
+        "Semanas":semanas,
+        "Puesto reporte":puestoDirecto
     }
 
 

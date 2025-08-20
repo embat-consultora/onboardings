@@ -11,8 +11,7 @@ from datetime import date
 from modulos.secciones import (
     seccion_informacion_personal,
     seccion_informacion_laboral,
-    seccion_informacion_remuneracion,
-    seccion_informacion_general
+    seccion_informacion_remuneracion
 )
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "onboarding_list"
@@ -49,7 +48,8 @@ if df_in_progress.empty:
         getOnboardings.clear()
         df = getOnboardings()
     st.stop()
-
+if "data_inicial" not in st.session_state:
+    st.session_state.data_inicial = {}
 # Mostrar selectbox con emails
 emails_disponibles = df_in_progress["Email"].dropna().unique().tolist()
 st.header("")
@@ -57,11 +57,18 @@ st.header("")
 colSelector ,colSpace,  colCarta, colRefresh = st.columns(4)
 with colSelector:
     email_seleccionado = st.selectbox("Seleccioná un onboarding", emails_disponibles)
-    onboarding = df_in_progress[df_in_progress["Email"] == email_seleccionado].iloc[0]
-    data_inicial = onboarding.to_dict()
+
+    # Solo si cambió el email seleccionado, recargo data_inicial desde sheet
+    if st.session_state.get("last_email_selected") != email_seleccionado:
+        onboarding = df_in_progress[df_in_progress["Email"] == email_seleccionado].iloc[0]
+        st.session_state.data_inicial = onboarding.to_dict()
+        st.session_state.last_email_selected = email_seleccionado
+data_inicial = st.session_state.data_inicial
+
 with colCarta:
     st.write("")
-    file_utils.generarCarta(data_inicial, tipo)
+    if st.button("Generar Carta", help="Recuerda primero guardar los cambios para que se vean reflejados en la carta"):
+        file_utils.generarCartaInProgress(email_seleccionado, tipo)
 with colSpace:
     st.write("")
     if st.button("🔄"):
@@ -116,48 +123,29 @@ with subirDocs:
     contrato = st.file_uploader("Contrato Firmado")
 
 opciones_beneficios=''
-if(tipo!="Hotel"):
+
+if tipo != "Hotel":
     st.subheader("Beneficios")
-    if "last_email_selected" not in st.session_state:
-        st.session_state.last_email_selected = None
-
-    # Inicializar beneficios si nunca se cargaron o si cambió el email
-    email_cambio = st.session_state.last_email_selected != email_seleccionado
-    beneficios_inicializados = any(k.startswith("checkbox_") for k in st.session_state)
-
-    if email_cambio or not beneficios_inicializados:
-        # Limpiar anteriores
-        for key in list(st.session_state.keys()):
-            if key.startswith("checkbox_"):
-                del st.session_state[key]
-
-        # Obtener beneficios guardados (si los hay)
+    raw_beneficios = data_inicial.get("Beneficios") or ""
+    try:
+        beneficios_guardados = json.loads(raw_beneficios) if raw_beneficios.strip() else {}
+    except Exception:
         beneficios_guardados = {}
-        if isinstance(data_inicial.get("Beneficios"), str):
-            try:
-                beneficios_guardados = json.loads(data_inicial["Beneficios"])
-            except Exception:
-                beneficios_guardados = {}
 
-        # Guardar en session_state
-        for beneficio in beneficiosLista["Nombre"].dropna().unique().tolist():
-            key = f"checkbox_{beneficio}"
-            st.session_state[key] = beneficios_guardados.get(beneficio, False)
+    opciones_beneficios = beneficiosLista["Nombre"].dropna().unique().tolist()
 
-        # Actualizar email actual
-        st.session_state.last_email_selected = email_seleccionado
+    version = str(len(raw_beneficios))  # si cambian datos, cambia la key
 
+    seleccionados = {}
     beneficiosContainer = st.container(height=400)
     with beneficiosContainer:
-        opciones_beneficios = beneficiosLista["Nombre"].dropna().unique().tolist()
         for beneficio in opciones_beneficios:
-            key = f"checkbox_{beneficio}"
-            st.checkbox(beneficio, key=key)
-
-        seleccionados = [
-            beneficio for beneficio in opciones_beneficios
-            if st.session_state.get(f"checkbox_{beneficio}", False)
-        ]
+            checked = st.checkbox(
+                beneficio,
+                value=beneficios_guardados.get(beneficio, False),
+                key=f"benef_{beneficio}_{version}"
+            )
+            seleccionados[beneficio] = checked
 
 nombre_ingreso =datos_personales["Nombre"]
 apellido_ingreso = datos_personales["Apellido"]
@@ -239,10 +227,7 @@ fecha_creacion = data_inicial["Fecha creación"]
 oferta_enviada = date.today().strftime("%d/%m/%Y") if estado == variables.estados[1] else ""
 contrato_firmado = date.today().strftime("%d/%m/%Y") if estado == variables.estados[3] else ""
 if st.button("Guardar", disabled=not campos_obligatorios_completos):
-    beneficios_json = {
-        beneficio: st.session_state.get(f"checkbox_{beneficio}", False)
-        for beneficio in opciones_beneficios
-    }
+    beneficios_json =seleccionados
     
     data = {
         "Fecha creación":fecha_creacion,
